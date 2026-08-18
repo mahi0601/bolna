@@ -84,6 +84,7 @@ from bolna.helpers.utils import (
     is_valid_md5,
     get_required_input_types,
     format_messages,
+    safe_log_text,
     get_prompt_responses,
     resample,
     save_audio_file_to_s3,
@@ -4457,7 +4458,7 @@ class TaskManager(BaseManager):
             meta_info.get("sequence_id"),
             meta_info.get("turn_id"),
             LLM_REGEN_SETTLE_S,
-            (transcriber_message or "")[:80],
+            safe_log_text(transcriber_message, 80),
         )
 
     async def __regen_after_settle(self):
@@ -4471,7 +4472,7 @@ class TaskManager(BaseManager):
             "BOLNA_TRACE_TM regen_settle fired seq=%s turn=%s text=%r",
             meta_info.get("sequence_id"),
             meta_info.get("turn_id"),
-            (transcriber_message or "")[:80],
+            safe_log_text(transcriber_message, 80),
         )
         self.kickoff_llm_generation(transcriber_message, meta_info)
 
@@ -4485,7 +4486,7 @@ class TaskManager(BaseManager):
             meta_info.get("response_group_uid"),
             meta_info.get("request_id"),
             len((transcriber_message or "").strip()),
-            (transcriber_message or "")[:120],
+            safe_log_text(transcriber_message),
         )
         if not self.tools["input"].welcome_message_played():
             logger.info(f"Welcome message is playing while spoken: {transcriber_message}")
@@ -4560,7 +4561,7 @@ class TaskManager(BaseManager):
             meta_info.get("turn_id"),
             meta_info.get("response_uid"),
             len(self.conversation_history.messages),
-            (transcriber_message or "")[:120],
+            safe_log_text(transcriber_message),
         )
 
         convert_to_request_log(
@@ -4948,7 +4949,7 @@ class TaskManager(BaseManager):
                             word_count,
                             self.tools["input"].is_audio_being_played_to_user(),
                             self.response_in_pipeline,
-                            transcript_content[:120],
+                            safe_log_text(transcript_content),
                         )
 
                         # response_in_pipeline deliberately not counted: with no audio playing yet, a short
